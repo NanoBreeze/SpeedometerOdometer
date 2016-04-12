@@ -19,7 +19,7 @@ public class Distance {
         //convert deltaTime from milliseconds to seconds because our acceleration unit is per s^2
         deltaTime /= 1000;
 
-        Log.d("A", "previousXAcceleration: " + previousXAcceleration + ", currentXVelocity: " + currentXVelocity);
+//        Log.d("A", "previousXAcceleration: " + previousXAcceleration + ", currentXVelocity: " + currentXVelocity);
 
         currentXDistance = currentXDistance + currentXVelocity * deltaTime - (previousXAcceleration * Math.pow(deltaTime,2)) /2;
 

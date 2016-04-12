@@ -10,6 +10,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -133,26 +134,50 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //determines the time elapsed since the previous onSensorChanged was called and sets the startTime
         double deltaTime = SystemClock.elapsedRealtime() - startTime;
 
-        //compute velocity along the y axis
-        double currentXVelocity = velocity.computeCurrentXVelocity(previousXAcceleration, deltaTime);
-        double currentYVelocity = velocity.computeCurrentXVelocity(previousYAcceleration, deltaTime);
-
-        double currentXDistance = distance.computeCurrentXDistance(previousXAcceleration, currentXVelocity, deltaTime);
-        double currentYDistance = distance.computeCurrentXDistance(previousYAcceleration, currentYVelocity, deltaTime);
+        double averageXAcceleration  = (event.values[0] + previousXAcceleration)/2;
+        double averageYAcceleration = (event.values[1] + previousYAcceleration)/2;
 
 
-        //set offset acceleration values, which are on average between -0.05 to 0.05 to be 0.
-        if ((-0.05 <= event.values[0]) && (event.values[0] <= 0.05)) {
+
+        //set offset acceleration values, which are on average between -0.1 to 0.1 to be 0.
+        if ((-0.3 <= event.values[0]) && (event.values[0] <= 0.3)) {
             previousXAcceleration = 0;
+            averageXAcceleration = 0;
         } else {
             previousXAcceleration = event.values[0];
         }
 
-        if ((-0.05 <= event.values[1]) && (event.values[1] <= 0.05)) {
+        if ((-0.3 <= event.values[1]) && (event.values[1] <= 0.3)) {
             previousYAcceleration = 0;
+            averageYAcceleration = 0;
         } else {
             previousYAcceleration = event.values[1];
         }
+
+
+        Log.d("Inside Main", "averageXAcceleration: " + averageXAcceleration + ", event.values[0]: " + event.values[0]);
+        Log.d("Inside Main", "averageYAcceleration: " + averageYAcceleration + ", event.values[1]: " + event.values[1]);
+
+        //compute velocity along the y axis
+        double currentXVelocity = velocity.computeCurrentXVelocity(averageXAcceleration, deltaTime);
+        double currentYVelocity = velocity.computeCurrentYVelocity(averageYAcceleration, deltaTime);
+
+        //we filtered using  the acceleration to reduce noise but sometimes, stuff still passes through, just enough to create a value for the current velocity
+        //which has a large enough value to cause a disturbance when calculating the distance. The current velocity, if inaccurate will be a very small value
+
+        //filter out noisy currentXVelocity and currentYVelocity, if less than 5km/h, then count as 0
+        if ((-1.4 <= currentXVelocity) && (currentXVelocity <= 1.4)) {
+            currentXVelocity = 0;
+        }
+
+        if ((-1.4 <= currentYVelocity) && (currentYVelocity <= 1.4)) {
+            currentYVelocity = 0;
+        }
+
+
+        double currentXDistance = distance.computeCurrentXDistance(averageXAcceleration, currentXVelocity, deltaTime);
+        double currentYDistance = distance.computeCurrentXDistance(averageYAcceleration, currentYVelocity, deltaTime);
+
 
         startTime = SystemClock.elapsedRealtime();
 

@@ -22,23 +22,27 @@ public class Velocity {
 
 
     //updates and returns current velocity along x-axis with the equation v2 = v1 + at, where acceleration is along x axis
-    public double computeCurrentXVelocity(double previousXAcceleration, double deltaTime) {
+    public double computeCurrentXVelocity(double averageXAcceleration, double deltaTime) {
 
         //convert deltaTime from milliseconds to seconds because our acceleration unit is per s^2
         deltaTime /= 1000;
 
-        currentXVelocity = currentXVelocity + previousXAcceleration * deltaTime;
+        currentXVelocity = currentXVelocity + averageXAcceleration * deltaTime;
+
+        Log.d("C", "averageXAcceleration: " + averageXAcceleration + ", currentXVelocity: " + currentXVelocity);
+
 
         return currentXVelocity;
     }
 
     //updates and returns current velocity along y-axis with the equation v2 = v1 + at, where acceleration is along y axis
-    public double computeCurrentYVelocity(double previousYAcceleration, double deltaTime) {
+    public double computeCurrentYVelocity(double averageYAcceleration, double deltaTime) {
 
         //convert deltaTime from milliseconds to seconds because our acceleration unit is per s^2
         deltaTime /= 1000;
 
-        currentYVelocity = currentYVelocity + previousYAcceleration * deltaTime;
+        currentYVelocity = currentYVelocity + averageYAcceleration * deltaTime;
+        Log.d("C", "averageYAcceleration: " + averageYAcceleration + ", currentYVelocity: " + currentYVelocity);
 
         return currentXVelocity;
     }
