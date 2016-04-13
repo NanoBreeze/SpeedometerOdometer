@@ -1,5 +1,6 @@
 package lennycheng.com.speedometerodometer;
 
+import android.graphics.Matrix;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -14,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 
@@ -28,14 +30,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     SensorManager sensorManager;
     Sensor accelerometer;
 
-    //These textviews include the accelerometer's readings
-    TextView tv_x;
-    TextView tv_y;
+    TextView tv_totalDistance;
+    TextView tv_currentTotalVelocity;
 
-    TextView tv_distanceX;
-    TextView tv_distanceY;
+    ImageView iv_needle;
 
-    TextView tv_time;
 
     Velocity velocity;
     Distance distance;
@@ -68,12 +67,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
-        tv_x = (TextView) findViewById(R.id.tv_velocityX);
-        tv_y = (TextView) findViewById(R.id.tv_velocityY);
-        tv_distanceX = (TextView) findViewById(R.id.tv_distanceX);
-        tv_distanceY = (TextView) findViewById(R.id.tv_distanceY);
+        tv_totalDistance = (TextView) findViewById(R.id.tv_totalDistance);
+        tv_currentTotalVelocity = (TextView) findViewById(R.id.tv_currentTotalVelocity);
 
-        tv_time = (TextView) findViewById(R.id.tv_time);
+        iv_needle = (ImageView) findViewById(R.id.iv_needle);
 
         velocity = new Velocity();
         distance = new Distance();
@@ -90,11 +87,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onResume() {
         super.onResume();
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        sensorManager.unregisterListener(this, accelerometer);
     }
 
     @Override
@@ -161,6 +160,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //compute velocity along the y axis
         double currentXVelocity = velocity.computeCurrentXVelocity(averageXAcceleration, deltaTime);
         double currentYVelocity = velocity.computeCurrentYVelocity(averageYAcceleration, deltaTime);
+        double currentTotalVelocity = velocity.computeTotalVelocity(currentXVelocity, currentYVelocity);
+
 
         //we filtered using  the acceleration to reduce noise but sometimes, stuff still passes through, just enough to create a value for the current velocity
         //which has a large enough value to cause a disturbance when calculating the distance. The current velocity, if inaccurate will be a very small value
@@ -175,20 +176,38 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
 
-        double currentXDistance = distance.computeCurrentXDistance(averageXAcceleration, currentXVelocity, deltaTime);
-        double currentYDistance = distance.computeCurrentXDistance(averageYAcceleration, currentYVelocity, deltaTime);
-
+        double xDistance = distance.computeCurrentXDistance(averageXAcceleration, currentXVelocity, deltaTime);
+        double yDistance = distance.computeCurrentYDistance(averageYAcceleration, currentYVelocity, deltaTime);
+        double totalDistance = distance.computeTotalDistance(xDistance, yDistance);
 
         startTime = SystemClock.elapsedRealtime();
 
-        tv_distanceX.setText(Double.toString(currentXDistance));
-        tv_distanceY.setText(Double.toString(currentYDistance));
-
-//        tv_time.setText(Double.toString(currentTotalVelocity));
+        displayCurrentVelocity(currentTotalVelocity*20);
+        displayTotalDistance(totalDistance);
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
+
+    //displays current velocity on activity
+    private void displayCurrentVelocity(double currentTotalVelocity) {
+        tv_currentTotalVelocity.setText(String.format("%.1f", currentTotalVelocity));
+
+
+//        Matrix matrix = new Matrix();
+//        iv_needle.setScaleType(ImageView.ScaleType.MATRIX);   //required
+//        matrix.postRotate((float) currentTotalVelocity, iv_needle.getDrawable().getBounds().width()/2, iv_needle.getDrawable().getBounds().height());
+//        iv_needle.setImageMatrix(matrix);
+        iv_needle.setRotation((float)currentTotalVelocity);
+
+    }
+
+    //displays the distance travelled on activity
+    private void displayTotalDistance(double totalDistance) {
+        tv_totalDistance.setText(String.format("%.1f", totalDistance));
+    }
+
+
 }

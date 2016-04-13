@@ -48,9 +48,8 @@ public class Velocity {
     }
 
 
-    private double computeCurrentTotalVelocity() {
+    public double computeTotalVelocity(double currentXVelocity, double currentYVelocity) {
         Log.d("H", Double.toString(currentTotalVelocity));
-        currentTotalVelocity = Math.sqrt( Math.pow(currentXVelocity,2) + Math.pow(currentYVelocity,2));
-        return currentTotalVelocity;
+        return currentTotalVelocity = Math.sqrt( Math.pow(currentXVelocity,2) + Math.pow(currentYVelocity,2));
     }
 }

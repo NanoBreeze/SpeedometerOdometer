@@ -1,7 +1,5 @@
 package lennycheng.com.speedometerodometer;
 
-import android.util.Log;
-
 /**
  * Contains distance-related fields and methods
  * Equations: d2 = d1 + v1t + (at^2)/2 OR d2 = d1 + v2t - (at^2)/2   (we use the latter)
@@ -10,8 +8,8 @@ public class Distance {
 
     private double currentTotalDistance;
 
-    private double currentXDistance;
-    private double currentYDistance;
+    private double xDistance;
+    private double yDistance;
 
     //updates and returns current distance along x-axis with the equation  d2 = d1 + v2t -  (at^2)/2, where acceleration and velocity are along the x-axis
     public double computeCurrentXDistance(double previousXAcceleration, double currentXVelocity, double deltaTime) {
@@ -21,9 +19,9 @@ public class Distance {
 
 //        Log.d("A", "previousXAcceleration: " + previousXAcceleration + ", currentXVelocity: " + currentXVelocity);
 
-        currentXDistance = currentXDistance + currentXVelocity * deltaTime - (previousXAcceleration * Math.pow(deltaTime,2)) /2;
+        xDistance = xDistance + currentXVelocity * deltaTime - (previousXAcceleration * Math.pow(deltaTime,2)) /2;
 
-        return currentXDistance;
+        return xDistance;
     }
 
     //updates and returns current distance along y-axis with the equation  d2 = d1 + v2t - (at^2)/2, where acceleration and velocity are along the y-axis
@@ -32,9 +30,13 @@ public class Distance {
         //convert deltaTime from milliseconds to seconds because our acceleration unit is per s^2
         deltaTime /= 1000;
 
-        currentYDistance = currentYDistance + currentYVelocity * deltaTime - (previousYAcceleration * Math.pow(deltaTime,2)) /2;
+        yDistance = yDistance + currentYVelocity * deltaTime - (previousYAcceleration * Math.pow(deltaTime,2)) /2;
 
-        return currentYDistance;
+        return yDistance;
+    }
+
+    public double computeTotalDistance(double currentXDistance, double currentYDistance) {
+        return currentTotalDistance = Math.sqrt( Math.pow(currentXDistance,2) + Math.pow(currentYDistance,2));
     }
 
 }

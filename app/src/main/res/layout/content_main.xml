@@ -12,44 +12,102 @@
     tools:context="lennycheng.com.speedometerodometer.MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <TextView
-        android:id="@+id/tv_velocityX"
+    <ImageView
+        android:id="@+id/iv_dashBoard"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="87dp"
-        android:text="New Text" />
+        android:contentDescription="@string/asdf"
+        android:src="@drawable/dashboard" />
 
-    <TextView
-        android:id="@+id/tv_velocityY"
+    <ImageView
+        android:id="@+id/iv_needle"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="180dp"
+        android:layout_alignBaseline="@+id/iv_dashBoard"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentStart="false"
+        android:layout_alignParentTop="false"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="51dp"
-        android:text="New Text" />
+        android:layout_marginTop="40dp"
+        android:adjustViewBounds="true"
+        android:scaleType="centerInside"
+        android:src="@drawable/needle"
+        android:contextClickable="false" />
 
+    <RelativeLayout
 
-    <TextView
+        android:id="@+id/rl_velocity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Text"
-        android:id="@+id/tv_time"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/iv_dashBoard">
 
-    <TextView
+        <TextView
+            android:id="@+id/tv_lblVelocity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="Current Velocity"
+            android:textSize="20sp" />
+
+        <!--android:layout_below="@+id/iv_dashBoard"-->
+
+        <TextView
+            android:id="@+id/tv_currentTotalVelocity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/tv_lblVelocity"
+            android:layout_centerHorizontal="true"
+            android:text="56"
+            android:textSize="80sp" />
+
+        <TextView
+            android:id="@+id/tv_velocityUnits"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/tv_currentTotalVelocity"
+            android:layout_toRightOf="@+id/tv_currentTotalVelocity"
+            android:text="m/s"
+            android:textSize="25sp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rl_distance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Text"
-        android:id="@+id/tv_distanceX"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/iv_dashBoard">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Text"
-        android:id="@+id/tv_distanceY"
-        android:layout_alignParentStart="true" />
+        <TextView
+            android:id="@+id/tv_lblDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="Total Distance"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/tv_totalDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/tv_lblDistance"
+            android:layout_below="@+id/tv_lblDistance"
+            android:layout_centerHorizontal="true"
+            android:text="327"
+            android:textSize="60sp" />
+
+        <TextView
+            android:id="@+id/tv_distanceUnits"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/tv_totalDistance"
+            android:layout_alignParentRight="true"
+            android:text="m"
+            android:textSize="25sp" />
+    </RelativeLayout>
+
 
 </RelativeLayout>
