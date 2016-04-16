@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name">SpeedometerOdometer</string>
-    <string name="action_settings">Settings</string>
-    <string name="asdf">asdf</string>
-    <string name="dfdf">dfdf</string>
+    <string name="app_name">Spodometer</string>
+    <string name="action_settings">Export to Sheets</string>
 </resources>

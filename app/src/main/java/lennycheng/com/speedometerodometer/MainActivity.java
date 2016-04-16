@@ -1,6 +1,5 @@
 package lennycheng.com.speedometerodometer;
 
-import android.graphics.Matrix;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -33,18 +32,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     TextView tv_totalDistance;
     TextView tv_currentTotalVelocity;
 
+    TextView tv_xVelocity;
+    TextView tv_yVelocity;
+    TextView tv_zVelocity;
+
+    TextView tv_xDistance;
+    TextView tv_yDistance;
+    TextView tv_zDistance;
+
     ImageView iv_needle;
 
 
-    Velocity velocity;
-    Distance distance;
-
     long startTime;
 
-    double previousXAcceleration;    //we use this because when the sensor is read, it gives the current acceleration and the
-    //time elapsed since previous reading but to be more accurate to use the previous value acceleration value. Kind of like
-    //Euler's method. It would be better to average the two accelerations together for even more accuracy.
-    double previousYAcceleration;
+    double[] previousAccelerations;
+    double[] averageAccelerations;
+
+    double[] currentVelocities;
+    double[] distances;
+
+//    double previousXAcceleration;    //we use this because when the sensor is read, it gives the current acceleration and the
+//    //time elapsed since previous reading but to be more accurate to use the previous value acceleration value. Kind of like
+//    //Euler's method. It would be better to average the two accelerations together for even more accuracy.
+//    double previousYAcceleration;
+//    double previousZAcceleration;
 
 
     @Override
@@ -54,26 +65,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
         sensorManager = (SensorManager) this.getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
+        //find the instance of the textViews
         tv_totalDistance = (TextView) findViewById(R.id.tv_totalDistance);
         tv_currentTotalVelocity = (TextView) findViewById(R.id.tv_currentTotalVelocity);
 
+        tv_xVelocity = (TextView) findViewById(R.id.tv_xVelocity);
+        tv_yVelocity = (TextView) findViewById(R.id.tv_yVelocity);
+        tv_zVelocity = (TextView) findViewById(R.id.tv_zVelocity);
+
+        tv_xDistance = (TextView) findViewById(R.id.tv_xDistance);
+        tv_yDistance = (TextView) findViewById(R.id.tv_yDistance);
+        tv_zDistance = (TextView) findViewById(R.id.tv_zDistance);
+
         iv_needle = (ImageView) findViewById(R.id.iv_needle);
 
-        velocity = new Velocity();
-        distance = new Distance();
+        previousAccelerations = new double[3];  //x, y, z
+        averageAccelerations = new double[3];
+
+        currentVelocities = new double[3];
+        distances = new double[3];
+
         startTime = SystemClock.elapsedRealtime();
 
     }
@@ -116,9 +131,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+//        if (id == R.id.action_settings) {
+//            return true;
+//        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -133,81 +148,69 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //determines the time elapsed since the previous onSensorChanged was called and sets the startTime
         double deltaTime = SystemClock.elapsedRealtime() - startTime;
 
-        double averageXAcceleration  = (event.values[0] + previousXAcceleration)/2;
-        double averageYAcceleration = (event.values[1] + previousYAcceleration)/2;
+        averageAccelerations = Acceleration.calculateAverageAccelerations(event.values, previousAccelerations);
+        previousAccelerations = Acceleration.sanitizePreviousAccelerations(event.values);
 
 
-
-        //set offset acceleration values, which are on average between -0.1 to 0.1 to be 0.
-        if ((-0.3 <= event.values[0]) && (event.values[0] <= 0.3)) {
-            previousXAcceleration = 0;
-            averageXAcceleration = 0;
-        } else {
-            previousXAcceleration = event.values[0];
-        }
-
-        if ((-0.3 <= event.values[1]) && (event.values[1] <= 0.3)) {
-            previousYAcceleration = 0;
-            averageYAcceleration = 0;
-        } else {
-            previousYAcceleration = event.values[1];
-        }
+        currentVelocities = Velocity.computeCurrentVelocities(currentVelocities, averageAccelerations, deltaTime);
+        currentVelocities = Velocity.sanitizeCurrentVelocities(currentVelocities);
 
 
-        Log.d("Inside Main", "averageXAcceleration: " + averageXAcceleration + ", event.values[0]: " + event.values[0]);
-        Log.d("Inside Main", "averageYAcceleration: " + averageYAcceleration + ", event.values[1]: " + event.values[1]);
-
-        //compute velocity along the y axis
-        double currentXVelocity = velocity.computeCurrentXVelocity(averageXAcceleration, deltaTime);
-        double currentYVelocity = velocity.computeCurrentYVelocity(averageYAcceleration, deltaTime);
-        double currentTotalVelocity = velocity.computeTotalVelocity(currentXVelocity, currentYVelocity);
-
-
-        //we filtered using  the acceleration to reduce noise but sometimes, stuff still passes through, just enough to create a value for the current velocity
-        //which has a large enough value to cause a disturbance when calculating the distance. The current velocity, if inaccurate will be a very small value
-
-        //filter out noisy currentXVelocity and currentYVelocity, if less than 5km/h, then count as 0
-        if ((-1.4 <= currentXVelocity) && (currentXVelocity <= 1.4)) {
-            currentXVelocity = 0;
-        }
-
-        if ((-1.4 <= currentYVelocity) && (currentYVelocity <= 1.4)) {
-            currentYVelocity = 0;
-        }
-
-
-        double xDistance = distance.computeCurrentXDistance(averageXAcceleration, currentXVelocity, deltaTime);
-        double yDistance = distance.computeCurrentYDistance(averageYAcceleration, currentYVelocity, deltaTime);
-        double totalDistance = distance.computeTotalDistance(xDistance, yDistance);
+        distances = Distance.computeDistances(distances, averageAccelerations, currentVelocities, deltaTime);
 
         startTime = SystemClock.elapsedRealtime();
 
-        displayCurrentVelocity(currentTotalVelocity*20);
-        displayTotalDistance(totalDistance);
+        double currentTotalVelocity = Velocity.computeTotalVelocity(currentVelocities);
+        displayCurrentVelocities(currentTotalVelocity, currentVelocities);
+
+        double totalDistance = Distance.computeTotalDistance(distances);
+        displayTotalDistances(totalDistance, distances);
     }
+
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
 
+    //change accerlerations and current velocities to 0
+    public void stopButton(View view) {
+        for (int i = 0; i < 3; i++) {
+            previousAccelerations[i] = 0;
+            averageAccelerations[i] = 0;
+            currentVelocities[i] = 0;
+        }
+    }
+
+
     //displays current velocity on activity
-    private void displayCurrentVelocity(double currentTotalVelocity) {
-        tv_currentTotalVelocity.setText(String.format("%.1f", currentTotalVelocity));
+    private void displayCurrentVelocities(double currentTotalVelocity, double[] currentVelocities) {
 
+        Log.d("Main", Double.toString(currentTotalVelocity));
 
-//        Matrix matrix = new Matrix();
-//        iv_needle.setScaleType(ImageView.ScaleType.MATRIX);   //required
-//        matrix.postRotate((float) currentTotalVelocity, iv_needle.getDrawable().getBounds().width()/2, iv_needle.getDrawable().getBounds().height());
-//        iv_needle.setImageMatrix(matrix);
-        iv_needle.setRotation((float)currentTotalVelocity);
+        tv_currentTotalVelocity.setText(String.format("%.0f", currentTotalVelocity * 3.6));
 
+        //if over 180, then point to 180
+        if (currentTotalVelocity * 3.6 > 180) {
+            iv_needle.setRotation(90);
+        }
+        //must be lower than 180
+        else {
+            iv_needle.setRotation((float) (currentTotalVelocity * 3.6 - 90));
+        }
+
+        tv_xVelocity.setText("x: " + String.format("%.1f", currentVelocities[0] * 3.6) + " km/h");
+        tv_yVelocity.setText("y: " + String.format("%.1f", currentVelocities[1] * 3.6) + " km/h");
+        tv_zVelocity.setText("z: " + String.format("%.1f", currentVelocities[2] * 3.6) + " km/h");
     }
 
     //displays the distance travelled on activity
-    private void displayTotalDistance(double totalDistance) {
-        tv_totalDistance.setText(String.format("%.1f", totalDistance));
+    private void displayTotalDistances(double totalDistance, double[] distances) {
+        tv_totalDistance.setText(String.format("%.0f", totalDistance));
+
+        tv_xDistance.setText("x: " + String.format("%.1f", distances[0]) + " m");
+        tv_yDistance.setText("y: " + String.format("%.1f", distances[1]) + " m");
+        tv_zDistance.setText("z: " + String.format("%.1f", distances[2]) + " m");
     }
-
-
 }
+

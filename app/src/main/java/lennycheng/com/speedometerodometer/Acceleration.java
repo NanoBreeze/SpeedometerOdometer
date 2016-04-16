@@ -5,23 +5,6 @@ package lennycheng.com.speedometerodometer;
  */
 public class Acceleration {
 
-    public static void filterAccelerations(float[] sensorAccelerations, double[] previousAccelerations, double[] averageAccelerations) {
-        //set offset acceleration values, which are on average between -0.3 to 0.3 to be 0.
-
-        double lowOffset = -0.3;
-        double highOffset = 0.3;
-
-        for (int i = 0; i < 3; i++) {
-
-            if ((lowOffset <= sensorAccelerations[i]) && (sensorAccelerations[i] <= highOffset)) {
-                previousAccelerations[i] = 0;
-                averageAccelerations[i] = 0;
-            } else {
-                previousAccelerations[i] = sensorAccelerations[i];
-            }
-        }
-    }
-
     public static double[] sanitizePreviousAccelerations(float[] sensorAccelerations) {
         //set offset acceleration values, which are on average between -0.3 to 0.3 to be 0.
 
@@ -47,21 +30,18 @@ public class Acceleration {
 
         double[] averageAccelerations = new double[3];
 
-        for (int i = 0; i < 3; i++) {
-            averageAccelerations[i] =
-                    (sensorAccelerations[i] + previousAccelerations[i]) / 2;
-        }
-
         double lowOffset = -0.3;
         double highOffset = 0.3;
 
-        //sanitize the average acceleration
         for (int i = 0; i < 3; i++) {
-
             if ((lowOffset <= sensorAccelerations[i]) && (sensorAccelerations[i] <= highOffset)) {
                 averageAccelerations[i] = 0;
+            } else {
+                averageAccelerations[i] =
+                        (sensorAccelerations[i] + previousAccelerations[i]) / 2;
             }
         }
+
         return averageAccelerations;
     }
 }

@@ -8,48 +8,56 @@ import android.util.Log;
  */
 public class Velocity {
 
-    private double currentTotalVelocity;
+    public static double[] computeCurrentVelocities(double[] currentVelocities, double[] averageAccelerations, double deltaTime) {
 
-    private double currentXVelocity;
-    private double currentYVelocity;
+        //convert deltaTime from milliseconds to seconds because our acceleration unit is per s^2
+        deltaTime /= 1000;
 
+        double[] newCurrentVelocities = new double[3];
 
+        for (int i = 0; i < 3; i++) {
+            newCurrentVelocities[0] = computeCurrent_Velocity(currentVelocities[i], averageAccelerations[i], deltaTime);
+        }
 
-    public double getCurrentXVelocity() {
-        return currentXVelocity;
+        return newCurrentVelocities;
     }
-    public double getCurrentYVelocity() { return currentYVelocity; }
 
+    public static double[] sanitizeCurrentVelocities(double[] currentVelocities) {
+
+        double[] sanitizedVelocities = new double[3];
+
+        double lowOffset = -1.4;
+        double highOffset = 1.4;
+
+        for (int i = 0; i < 3; i++) {
+            if ((lowOffset <= currentVelocities[i]) && (currentVelocities[i] <= highOffset)) {
+                sanitizedVelocities[i] = 0;
+            }
+            else {
+                sanitizedVelocities[i] = currentVelocities[i];
+            }
+        }
+
+        return sanitizedVelocities;
+    }
+
+    //technically, since Distance class already contains the current x, y, z velocities, we don't need these parameters
+    //but I feel it is more maintainable if we use local variables
+    public static double computeTotalVelocity(double[] currentVelocities) {
+
+        double currentTotalVelocity = 0;
+
+        for (double velocity : currentVelocities) {
+            currentTotalVelocity += Math.pow(velocity,2);
+        }
+
+        currentTotalVelocity = Math.sqrt(currentTotalVelocity);
+
+        return currentTotalVelocity;
+    }
 
     //updates and returns current velocity along x-axis with the equation v2 = v1 + at, where acceleration is along x axis
-    public double computeCurrentXVelocity(double averageXAcceleration, double deltaTime) {
-
-        //convert deltaTime from milliseconds to seconds because our acceleration unit is per s^2
-        deltaTime /= 1000;
-
-        currentXVelocity = currentXVelocity + averageXAcceleration * deltaTime;
-
-        Log.d("C", "averageXAcceleration: " + averageXAcceleration + ", currentXVelocity: " + currentXVelocity);
-
-
-        return currentXVelocity;
-    }
-
-    //updates and returns current velocity along y-axis with the equation v2 = v1 + at, where acceleration is along y axis
-    public double computeCurrentYVelocity(double averageYAcceleration, double deltaTime) {
-
-        //convert deltaTime from milliseconds to seconds because our acceleration unit is per s^2
-        deltaTime /= 1000;
-
-        currentYVelocity = currentYVelocity + averageYAcceleration * deltaTime;
-        Log.d("C", "averageYAcceleration: " + averageYAcceleration + ", currentYVelocity: " + currentYVelocity);
-
-        return currentXVelocity;
-    }
-
-
-    public double computeTotalVelocity(double currentXVelocity, double currentYVelocity) {
-        Log.d("H", Double.toString(currentTotalVelocity));
-        return currentTotalVelocity = Math.sqrt( Math.pow(currentXVelocity,2) + Math.pow(currentYVelocity,2));
+    private static double computeCurrent_Velocity(double current_Velocity, double average_Acceleration, double deltaTime) {
+        return  current_Velocity + average_Acceleration * deltaTime;
     }
 }
