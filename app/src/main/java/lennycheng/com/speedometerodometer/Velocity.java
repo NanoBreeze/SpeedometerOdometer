@@ -26,8 +26,8 @@ public class Velocity {
 
         double[] sanitizedVelocities = new double[3];
 
-        double lowOffset = -1.4;
-        double highOffset = 1.4;
+        double lowOffset = -0.3;
+        double highOffset = 0.3;
 
         for (int i = 0; i < 3; i++) {
             if ((lowOffset <= currentVelocities[i]) && (currentVelocities[i] <= highOffset)) {

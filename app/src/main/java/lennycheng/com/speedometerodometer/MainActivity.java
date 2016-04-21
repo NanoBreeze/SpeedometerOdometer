@@ -1,5 +1,6 @@
 package lennycheng.com.speedometerodometer;
 
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -90,19 +91,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         distances = new double[3];
 
         startTime = SystemClock.elapsedRealtime();
+             Log.d("AHHHH", "onCreate() called");
 
     }
 
 
     @Override
     protected void onStart() {
-        super.onStart();
+        super.onStart();        Log.d("AHHHH", "onStart() called");
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        Log.d("AHHHH", "onResume() called");
     }
 
     @Override
@@ -131,9 +135,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
+        if (id == R.id.action_settings) {
+            Intent intent=new Intent(this,Settings.class);
+            startActivity(intent);
+        }
 
         return super.onOptionsItemSelected(item);
     }

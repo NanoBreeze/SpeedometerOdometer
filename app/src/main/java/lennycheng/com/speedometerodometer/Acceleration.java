@@ -10,8 +10,8 @@ public class Acceleration {
 
         double[] previousAccelerations = new double[3];
 
-        double lowOffset = -0.3;
-        double highOffset = 0.3;
+        double lowOffset = -0.1;
+        double highOffset = 0.1;
 
         for (int i = 0; i < 3; i++) {
 
@@ -30,8 +30,8 @@ public class Acceleration {
 
         double[] averageAccelerations = new double[3];
 
-        double lowOffset = -0.3;
-        double highOffset = 0.3;
+        double lowOffset = -0.1;
+        double highOffset = 0.1;
 
         for (int i = 0; i < 3; i++) {
             if ((lowOffset <= sensorAccelerations[i]) && (sensorAccelerations[i] <= highOffset)) {

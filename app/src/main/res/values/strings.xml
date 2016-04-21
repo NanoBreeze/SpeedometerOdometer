@@ -1,4 +1,43 @@
 <resources>
     <string name="app_name">Spodometer</string>
-    <string name="action_settings">Export to Sheets</string>
+    <string name="action_Export">Export to Drive</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Used to populate the spinner containing the file types program can export to-->
+    <string-array name="exportFileTypes">
+        <item>xls</item>
+        <item>xlsx</item>
+        <item>csv</item>
+        <item>txt</item>
+        <item>docx</item>
+    </string-array>
+
+
+    <!-- Used to populate the spinner containing the time gap for recording velocity. Same as timeGapDistance -->
+    <string-array name="timeGapVelocity">
+        <item>1s</item>
+        <item>10s</item>
+        <item>30s</item>
+        <item>1min</item>
+        <item>2mins</item>
+        <item>5mins</item>
+        <item>10mins</item>
+        <item>15mins</item>
+        <item>30mins</item>
+    </string-array>
+
+
+    <!-- Used to populate the spinner containing the time gap for recording velocity. Same as timeGapDistance -->
+    <string-array name="timeGapDistance">
+        <item>1s</item>
+        <item>10s</item>
+        <item>30s</item>
+        <item>1min</item>
+        <item>2mins</item>
+        <item>5mins</item>
+        <item>10mins</item>
+        <item>15mins</item>
+        <item>30mins</item>
+    </string-array>
+
 </resources>
