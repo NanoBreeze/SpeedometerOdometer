@@ -8,6 +8,12 @@ import android.util.Log;
  */
 public class Velocity {
 
+    private static double offset;  //has the value user indicated in shared preference. Used for sanitation
+
+    public static void setOffset(double ofset) {
+        offset = ofset;
+    }
+
     public static double[] computeCurrentVelocities(double[] currentVelocities, double[] averageAccelerations, double deltaTime) {
 
         //convert deltaTime from milliseconds to seconds because our acceleration unit is per s^2
@@ -26,8 +32,8 @@ public class Velocity {
 
         double[] sanitizedVelocities = new double[3];
 
-        double lowOffset = -0.3;
-        double highOffset = 0.3;
+        double lowOffset = offset * -1;
+        double highOffset = offset;
 
         for (int i = 0; i < 3; i++) {
             if ((lowOffset <= currentVelocities[i]) && (currentVelocities[i] <= highOffset)) {

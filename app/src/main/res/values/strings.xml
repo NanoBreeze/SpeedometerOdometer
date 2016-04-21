@@ -1,6 +1,7 @@
 <resources>
+    <string name="google_app_id">spodometer</string>
     <string name="app_name">Spodometer</string>
-    <string name="action_Export">Export to Drive</string>
+    <string name="action_Upload">Upload to Drive</string>
     <string name="title_activity_settings">Settings</string>
 
     <!-- Used to populate the spinner containing the file types program can export to-->
@@ -23,7 +24,6 @@
         <item>5mins</item>
         <item>10mins</item>
         <item>15mins</item>
-        <item>30mins</item>
     </string-array>
 
 
@@ -37,7 +37,16 @@
         <item>5mins</item>
         <item>10mins</item>
         <item>15mins</item>
-        <item>30mins</item>
     </string-array>
+
+    <!-- Shared preference keys -->
+    <string name="sp_Preferences">Preferences</string>
+    <string name="sp_FileType">FileType</string>
+    <string name="sp_VelocityTimeGap">VelocityTimeGap</string>
+    <string name="sp_DistanceTimeGap">DistanceTimeGap</string>
+    <string name="sp_AccelerationOffset">AccelerationOffset</string>
+    <string name="sp_VelocityOffset">VelocityOffset</string>
+    <string name="title_activity_upload">Upload</string>
+
 
 </resources>

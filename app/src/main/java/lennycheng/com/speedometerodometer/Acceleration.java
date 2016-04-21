@@ -5,13 +5,19 @@ package lennycheng.com.speedometerodometer;
  */
 public class Acceleration {
 
+    private static double offset;  //has the value user indicated in shared preference. Used for sanitation
+
+    public static void setOffset(double ofset) {
+        offset = ofset;
+    }
+
     public static double[] sanitizePreviousAccelerations(float[] sensorAccelerations) {
         //set offset acceleration values, which are on average between -0.3 to 0.3 to be 0.
 
         double[] previousAccelerations = new double[3];
 
-        double lowOffset = -0.1;
-        double highOffset = 0.1;
+        double lowOffset = offset * -1;
+        double highOffset = offset;
 
         for (int i = 0; i < 3; i++) {
 
@@ -30,8 +36,8 @@ public class Acceleration {
 
         double[] averageAccelerations = new double[3];
 
-        double lowOffset = -0.1;
-        double highOffset = 0.1;
+        double lowOffset = offset * -1;
+        double highOffset = offset;
 
         for (int i = 0; i < 3; i++) {
             if ((lowOffset <= sensorAccelerations[i]) && (sensorAccelerations[i] <= highOffset)) {

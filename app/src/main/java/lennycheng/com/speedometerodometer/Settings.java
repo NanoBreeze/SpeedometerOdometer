@@ -4,9 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.ArrayRes;
-import android.support.annotation.IdRes;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -24,13 +21,12 @@ public class Settings extends AppCompatActivity {
     EditText et_accelerationFilter;
     EditText et_velocityFilter;
 
-    final String FILE_TYPE = "fileType";
-    final String VELOCITY_TIME_GAP = "velocityTimeGap";
-    final String DISTANCE_TIME_GAP = "distanceTimeGap";
-    final String ACCELERATION_FILTER = "accelerationFilter";
-    final String VELOCITY_FILTER = "velocityFilter";
-
-    final String PREFERENCES = "Preferences";
+    String FILE_TYPE;
+    String VELOCITY_TIME_GAP;
+    String DISTANCE_TIME_GAP;
+    String ACCELERATION_OFFSET;
+    String VELOCITY_OFFSET;
+    String PREFERENCES;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +45,12 @@ public class Settings extends AppCompatActivity {
 //        });
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        FILE_TYPE = getResources().getString(R.string.sp_FileType);
+        VELOCITY_TIME_GAP = getResources().getString(R.string.sp_VelocityTimeGap);
+        DISTANCE_TIME_GAP = getResources().getString(R.string.sp_DistanceTimeGap);
+        ACCELERATION_OFFSET = getResources().getString(R.string.sp_AccelerationOffset);
+        VELOCITY_OFFSET = getResources().getString(R.string.sp_VelocityOffset);
+        PREFERENCES = getResources().getString(R.string.sp_Preferences);
 
         instantiateWidgets();
         setWidgetValues(); //uses values from Shared preferences
@@ -74,8 +76,8 @@ public class Settings extends AppCompatActivity {
 
     private void setWidgetValues() {
         SharedPreferences sharedPref = getSharedPreferences(PREFERENCES,Context.MODE_PRIVATE);
-        float accelerationFilter = sharedPref.getFloat(ACCELERATION_FILTER, (float)0.1);
-        float velocityFilter = sharedPref.getFloat(VELOCITY_FILTER, (float)0.1);
+        float accelerationFilter = sharedPref.getFloat(ACCELERATION_OFFSET, (float)0.1);
+        float velocityFilter = sharedPref.getFloat(VELOCITY_OFFSET, (float)0.1);
         String fileType = sharedPref.getString(FILE_TYPE, "xlsx");
         String velocityTimeGap = sharedPref.getString(VELOCITY_TIME_GAP,"10s");
         String distanceTimeGap = sharedPref.getString(DISTANCE_TIME_GAP,"10s");
@@ -134,8 +136,8 @@ public class Settings extends AppCompatActivity {
         editor.putString(FILE_TYPE, text_fileType);
         editor.putString(VELOCITY_TIME_GAP, text_velocityTimeGap);
         editor.putString(DISTANCE_TIME_GAP, text_distanceTimeGap);
-        editor.putFloat(ACCELERATION_FILTER, Float.parseFloat(text_accelerationFilter));
-        editor.putFloat(VELOCITY_FILTER, Float.parseFloat(text_velocityFilter));
+        editor.putFloat(ACCELERATION_OFFSET, Float.parseFloat(text_accelerationFilter));
+        editor.putFloat(VELOCITY_OFFSET, Float.parseFloat(text_velocityFilter));
 
         editor.commit();
     }

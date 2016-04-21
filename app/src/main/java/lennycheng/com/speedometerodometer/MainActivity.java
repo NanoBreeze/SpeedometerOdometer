@@ -1,14 +1,14 @@
 package lennycheng.com.speedometerodometer;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -17,6 +17,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /* Kinematics equations
@@ -52,12 +55,25 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     double[] currentVelocities;
     double[] distances;
 
-//    double previousXAcceleration;    //we use this because when the sensor is read, it gives the current acceleration and the
-//    //time elapsed since previous reading but to be more accurate to use the previous value acceleration value. Kind of like
-//    //Euler's method. It would be better to average the two accelerations together for even more accuracy.
-//    double previousYAcceleration;
-//    double previousZAcceleration;
+    String FILE_TYPE;
+    String VELOCITY_TIME_GAP;
+     String DISTANCE_TIME_GAP;
+    String ACCELERATION_OFFSET;
+    String VELOCITY_OFFSET;
+    String PREFERENCES;
 
+    String fileType; //the type of file to export to
+
+    //number of times the sensor is hit . Since sensor is handled
+    //every 200ms, 5 hits equals 1s
+    int velocityTimeGapCount;
+    int distanceTimeGapCount;
+
+    int velocityTimeGapConstant;    //This is the number of times the sensor must be hit to add velocity to List
+    int distanceTimeGapConstant;
+
+    List averageVelocityTimeGapValues;  //for storing the velocities per time gap time
+    List totalDistanceTimeGapValues;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,24 +106,77 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         currentVelocities = new double[3];
         distances = new double[3];
 
+        averageVelocityTimeGapValues = new ArrayList<Double>();
+        totalDistanceTimeGapValues = new ArrayList<Double>();
+
         startTime = SystemClock.elapsedRealtime();
-             Log.d("AHHHH", "onCreate() called");
+        Log.d("AHHHH", "onCreate() called");
+
+
+         FILE_TYPE = getResources().getString(R.string.sp_FileType);
+         VELOCITY_TIME_GAP = getResources().getString(R.string.sp_VelocityTimeGap);
+         DISTANCE_TIME_GAP = getResources().getString(R.string.sp_DistanceTimeGap);
+         ACCELERATION_OFFSET = getResources().getString(R.string.sp_AccelerationOffset);
+         VELOCITY_OFFSET = getResources().getString(R.string.sp_VelocityOffset);
+         PREFERENCES = getResources().getString(R.string.sp_Preferences);
 
     }
 
 
     @Override
     protected void onStart() {
-        super.onStart();        Log.d("AHHHH", "onStart() called");
+        super.onStart();
+        Log.d("AHHHH", "onStart() called");
 
     }
 
     @Override
+    //register sensor
+    //set the offset in Acceleration and Velocity, comes from shared preferences (which return default value if none is availalbe)
     protected void onResume() {
         super.onResume();
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-        Log.d("AHHHH", "onResume() called");
+
+
+        SharedPreferences sharedPref = getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+        float accelerationOffset = sharedPref.getFloat(ACCELERATION_OFFSET, (float) 0.1);
+        float velocityOffset = sharedPref.getFloat(VELOCITY_OFFSET, (float) 0.1);
+
+        //change the acceleration and velocity filter to match this float value
+        Acceleration.setOffset(accelerationOffset);
+        Velocity.setOffset(velocityOffset);
+
+        fileType = sharedPref.getString(FILE_TYPE, "xlsx");
+        velocityTimeGapConstant = adjustForTimeGapCount(sharedPref.getString(VELOCITY_TIME_GAP, "10s"));
+        distanceTimeGapConstant = adjustForTimeGapCount(sharedPref.getString(DISTANCE_TIME_GAP, "10s"));
     }
+
+    //indicates the number of times the sensor, which is handled every 200ms, must be handled to record the time
+    int adjustForTimeGapCount(String timeGap) {
+        switch (timeGap) {
+            case "1s":
+                return 5;
+            case "10s":
+                return 50;
+            case "30s":
+                return 150;
+            case "1min":
+                return 300;
+            case "2mins":
+                return 600;
+            case "5mins":
+                return 1500;
+            case "10mins":
+                return 3000;
+            case "15mins":
+                return 4500;
+            case "30mins":
+                return 9000;
+            default:
+                throw new RuntimeException("adjustForTimeGapCount received an invalid value");
+        }
+    }
+
 
     @Override
     protected void onPause() {
@@ -135,8 +204,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
+        //go to settings activity
         if (id == R.id.action_settings) {
-            Intent intent=new Intent(this,Settings.class);
+            Intent intent = new Intent(this, Settings.class);
+            startActivity(intent);
+        }
+        //upload data to Drive
+        else {
+            Intent intent = new Intent(this, Upload.class);
             startActivity(intent);
         }
 
@@ -170,6 +245,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         double totalDistance = Distance.computeTotalDistance(distances);
         displayTotalDistances(totalDistance, distances);
+
+        //add velocity and distance to data strucutre, later for exporting to Drive. If reached, add and set to 0, otherwise, increment
+        if (velocityTimeGapCount == velocityTimeGapConstant) {
+            averageVelocityTimeGapValues.add(currentTotalVelocity);
+            velocityTimeGapCount = 0;
+        } else {
+            velocityTimeGapCount++;
+        }
+
+        if (distanceTimeGapCount == distanceTimeGapConstant) {
+            totalDistanceTimeGapValues.add(totalDistance);
+            distanceTimeGapCount = 0;
+        } else {
+            distanceTimeGapCount++;
+        }
     }
 
 
