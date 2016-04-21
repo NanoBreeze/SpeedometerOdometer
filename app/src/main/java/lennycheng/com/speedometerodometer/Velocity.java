@@ -22,7 +22,7 @@ public class Velocity {
         double[] newCurrentVelocities = new double[3];
 
         for (int i = 0; i < 3; i++) {
-            newCurrentVelocities[0] = computeCurrent_Velocity(currentVelocities[i], averageAccelerations[i], deltaTime);
+            newCurrentVelocities[i] = computeCurrent_Velocity(currentVelocities[i], averageAccelerations[i], deltaTime);
         }
 
         return newCurrentVelocities;

@@ -19,8 +19,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
-
 
 /* Kinematics equations
 d2 = d1 + v1t + (at^2)/2        (calculating distance)
@@ -104,7 +102,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         currentVelocities = new double[3];
         distances = new double[3];
-
 
 
         startTime = SystemClock.elapsedRealtime();
