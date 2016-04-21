@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     ImageView iv_needle;
 
-
     long startTime;
 
     double[] previousAccelerations;
@@ -72,8 +71,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     int velocityTimeGapConstant;    //This is the number of times the sensor must be hit to add velocity to List
     int distanceTimeGapConstant;
 
-    List averageVelocityTimeGapValues;  //for storing the velocities per time gap time
-    List totalDistanceTimeGapValues;
+    ArrayList averageVelocityTimeGapValues;  //for storing the velocities per time gap time
+    ArrayList totalDistanceTimeGapValues;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,8 +105,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         currentVelocities = new double[3];
         distances = new double[3];
 
-        averageVelocityTimeGapValues = new ArrayList<Double>();
-        totalDistanceTimeGapValues = new ArrayList<Double>();
+
 
         startTime = SystemClock.elapsedRealtime();
         Log.d("AHHHH", "onCreate() called");
@@ -149,6 +147,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         fileType = sharedPref.getString(FILE_TYPE, "xlsx");
         velocityTimeGapConstant = adjustForTimeGapCount(sharedPref.getString(VELOCITY_TIME_GAP, "10s"));
         distanceTimeGapConstant = adjustForTimeGapCount(sharedPref.getString(DISTANCE_TIME_GAP, "10s"));
+
+        averageVelocityTimeGapValues = new ArrayList<Double>();
+        totalDistanceTimeGapValues = new ArrayList<Double>();
     }
 
     //indicates the number of times the sensor, which is handled every 200ms, must be handled to record the time
@@ -170,8 +171,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 return 3000;
             case "15mins":
                 return 4500;
-            case "30mins":
-                return 9000;
             default:
                 throw new RuntimeException("adjustForTimeGapCount received an invalid value");
         }
@@ -212,7 +211,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //upload data to Drive
         else {
             Intent intent = new Intent(this, Upload.class);
+            intent.putExtra("averageVelocityTimeGapValues",averageVelocityTimeGapValues);
+            intent.putExtra("totalDistanceTimeGapValues",totalDistanceTimeGapValues);
+            intent.putExtra("velocityTimeGapConstant",velocityTimeGapConstant);
+            intent.putExtra("distanceTimeGapConstant",distanceTimeGapConstant);
+            intent.putExtra("fileType",fileType);
             startActivity(intent);
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -231,13 +236,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         averageAccelerations = Acceleration.calculateAverageAccelerations(event.values, previousAccelerations);
         previousAccelerations = Acceleration.sanitizePreviousAccelerations(event.values);
 
-
         currentVelocities = Velocity.computeCurrentVelocities(currentVelocities, averageAccelerations, deltaTime);
         currentVelocities = Velocity.sanitizeCurrentVelocities(currentVelocities);
 
 
         distances = Distance.computeDistances(distances, averageAccelerations, currentVelocities, deltaTime);
-
         startTime = SystemClock.elapsedRealtime();
 
         double currentTotalVelocity = Velocity.computeTotalVelocity(currentVelocities);
