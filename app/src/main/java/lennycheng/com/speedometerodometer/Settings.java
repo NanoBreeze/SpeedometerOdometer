@@ -1,6 +1,7 @@
 package lennycheng.com.speedometerodometer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.ArrayRes;
@@ -11,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 public class Settings extends AppCompatActivity {
 
@@ -117,7 +119,7 @@ public class Settings extends AppCompatActivity {
     }
 
 
-    //saves the user's settings and activates them
+    //saves the user's settings and activates them and returns to MainActivity
     public void save(View view) {
 
         //get spinner values
@@ -140,5 +142,12 @@ public class Settings extends AppCompatActivity {
         editor.putFloat(VELOCITY_OFFSET, Float.parseFloat(text_velocityFilter));
 
         editor.commit();
+
+        //Display toast that the values are saved and go to MainActivity
+
+        Toast.makeText(this, "Settings saved",Toast.LENGTH_SHORT).show();
+
+        Intent intent=new Intent(this,MainActivity.class);
+        startActivity(intent);
     }
 }

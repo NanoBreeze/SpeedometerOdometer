@@ -54,15 +54,15 @@ public class Upload extends AppCompatActivity implements GoogleApiClient.Connect
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+//            }
+//        });
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         averageVelocityTimeGapValues = (ArrayList<Double>) getIntent().getSerializableExtra("averageVelocityTimeGapValues");
         totalDistanceTimeGapValues = (ArrayList<Double>) getIntent().getSerializableExtra("totalDistanceTimeGapValues");
